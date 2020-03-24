@@ -772,7 +772,9 @@ class PlotlyPanelCtrl extends MetricsPanelCtrl {
           cloneTraces.name = eventId
           cloneTraces.x = position.start !== position.end ? cloneTraces.x.slice(position.start, position.end): []
           cloneTraces.y = position.start !== position.end ? cloneTraces.y.slice(position.start, position.end): []
-          cloneTraces.z = position.start !== position.end ? cloneTraces.z.slice(position.start, position.end): []
+          if (!this.is3d()) {
+            cloneTraces.z = position.start !== position.end ? cloneTraces.z.slice(position.start, position.end): []
+          }
           newTraces.push(cloneTraces)
         })
         console.log(newTraces);
