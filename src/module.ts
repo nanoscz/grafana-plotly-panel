@@ -758,23 +758,25 @@ class PlotlyPanelCtrl extends MetricsPanelCtrl {
         });
       }
     });
-    const newSeries = this.getDataByRefId(this.series)
-    const eventsArray = newSeries[0].series.datapoints.map(x => x[0])
-    const eventIds = this.getEventIdForIndex(eventsArray)
-    let newTraces: any = []
-    eventIds.forEach((item, i) => {
-      let eventId = item.eventId
-      let position = item.position
-      let cloneTraces = Object.assign({}, this.traces[0])
-      cloneTraces.position = position
-      cloneTraces.name = eventId
-      cloneTraces.x = cloneTraces.x.slice(position.start, position.end)
-      cloneTraces.y = cloneTraces.y.slice(position.start, position.end)
-      cloneTraces.z = cloneTraces.z.slice(position.start, position.end)
-      newTraces.push(cloneTraces)
-    })
-    console.log(newTraces);
-    this.traces = newTraces;
+    if(this.series.length > 0) {
+      const newSeries = this.getDataByRefId(this.series)
+      const eventsArray = newSeries[0].series.datapoints.map(x => x[0])
+      const eventIds = this.getEventIdForIndex(eventsArray)
+      let newTraces: any = []
+      eventIds.forEach((item, i) => {
+        let eventId = item.eventId
+        let position = item.position
+        let cloneTraces = Object.assign({}, this.traces[0])
+        cloneTraces.position = position
+        cloneTraces.name = eventId
+        cloneTraces.x = cloneTraces.x.slice(position.start, position.end)
+        cloneTraces.y = cloneTraces.y.slice(position.start, position.end)
+        cloneTraces.z = cloneTraces.z.slice(position.start, position.end)
+        newTraces.push(cloneTraces)
+      })
+      console.log(newTraces);
+      this.traces = newTraces;
+    }
     //console.log('SetDATA', this.traces);
     return true;
   }
