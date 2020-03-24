@@ -2,7 +2,7 @@
 
 ///<reference path="../node_modules/grafana-sdk-mocks/app/headers/common.d.ts" />
 
-import {MetricsPanelCtrl} from 'app/plugins/sdk';
+import { MetricsPanelCtrl } from 'app/plugins/sdk';
 
 import _ from 'lodash';
 import moment from 'moment';
@@ -14,11 +14,11 @@ import {
   SeriesWrapperTable,
   SeriesWrapperTableRow,
 } from './SeriesWrapper';
-import {EditorHelper} from './editor';
+import { EditorHelper } from './editor';
 
-import {loadPlotly, loadIfNecessary} from './libLoader';
-import {AnnoInfo} from './anno';
-import {Axis} from 'plotly.js';
+import { loadPlotly, loadIfNecessary } from './libLoader';
+import { AnnoInfo } from './anno';
+import { Axis } from 'plotly.js';
 
 let Plotly: any; // Loaded dynamically!
 
@@ -142,7 +142,7 @@ class PlotlyPanelCtrl extends MetricsPanelCtrl {
     private annotationsSrv
   ) {
     super($scope, $injector);
-    
+
     this.initialized = false;
 
     //this.$tooltip = $('<div id="tooltip" class="graph-tooltip">');
@@ -502,7 +502,7 @@ class PlotlyPanelCtrl extends MetricsPanelCtrl {
         min -= 1000;
         max += 1000;
 
-        const range = {from: moment.utc(min), to: moment.utc(max)};
+        const range = { from: moment.utc(min), to: moment.utc(max) };
 
         console.log('SELECTED!!!', min, max, data.points.length, range);
 
@@ -630,12 +630,12 @@ class PlotlyPanelCtrl extends MetricsPanelCtrl {
   }
 
   getDataByRefId(series: any = []) {
-    let newSeries: any = []
-    if(series.length > 0) {
+    let newSeries: any = [];
+    if (series.length > 0) {
       for (let serie of series) {
-        const exits =  newSeries.filter((item: any) => item.refId == serie.refId)
-        if(!exits.length) {
-          newSeries.push(serie)
+        const exits = newSeries.filter((item: any) => item.refId == serie.refId);
+        if (!exits.length) {
+          newSeries.push(serie);
         }
       }
     }
@@ -643,19 +643,25 @@ class PlotlyPanelCtrl extends MetricsPanelCtrl {
   }
 
   getEventIdForIndex(eventsArray) {
-    let results: any = []
+    let results: any = [];
     eventsArray.map(function (item, index, array) {
       if (array.indexOf(item) === index) {
-        results.push({ position: { start: index, end: array.lastIndexOf(item)}, eventId: item })
+        results.push({ position: { start: index, end: array.lastIndexOf(item) }, eventId: item });
       }
     })
-    return results
+    return results;
   }
 
+  getFirstEventId(eventIds: any) {
+    const max = 10;
+    let result = [];
+    result = eventIds.length > max ? eventIds.slice(0, max): eventIds;
+    return result;
+  }
   // This will update all trace settings *except* the data
   _updateTracesFromConfigs() {
     this.dataWarnings = [];
-    
+
     // Make sure we have a trace
     if (this.cfg.traces == null || this.cfg.traces.length < 1) {
       this.cfg.traces = [_.cloneDeep(PlotlyPanelCtrl.defaultTrace)];
@@ -725,9 +731,9 @@ class PlotlyPanelCtrl extends MetricsPanelCtrl {
     } else if (this.traces.length !== this.cfg.traces.length) {
       console.log(
         'trace number mismatch.  Found: ' +
-          this.traces.length +
-          ', expect: ' +
-          this.cfg.traces.length
+        this.traces.length +
+        ', expect: ' +
+        this.cfg.traces.length
       );
       this._updateTracesFromConfigs();
     }
@@ -758,28 +764,32 @@ class PlotlyPanelCtrl extends MetricsPanelCtrl {
         });
       }
     });
-    if(this.series !== undefined) {
-      const newSeries = this.getDataByRefId(this.series)
-      if(newSeries.length !== 0) {
-        const eventsArray = newSeries[0].series.datapoints.map(x => x[0])
-        const eventIds = this.getEventIdForIndex(eventsArray)
-        let newTraces: any = []
-        eventIds.forEach((item, i) => {
-          let eventId = item.eventId
-          let position = item.position
-          let cloneTraces = Object.assign({}, this.traces[0])
-          cloneTraces.position = position
-          cloneTraces.name = eventId
-          cloneTraces.x = position.start !== position.end ? cloneTraces.x.slice(position.start, position.end): []
-          cloneTraces.y = position.start !== position.end ? cloneTraces.y.slice(position.start, position.end): []
-          if (!this.is3d()) {
-            cloneTraces.z = position.start !== position.end ? cloneTraces.z.slice(position.start, position.end): []
+    try {
+      if (this.series !== undefined && this.series.length !== 0) {
+        const newSeries = this.getDataByRefId(this.series);
+        if (newSeries.length !== 0) {
+          const eventsArray = newSeries[0].series.datapoints.map(x => x[0]).filter(e => e !== null); //total de eventIDs
+          let eventIds = this.getEventIdForIndex(eventsArray);
+          eventIds = this.getFirstEventId(eventIds);
+          let newTraces: any = [];
+          for (const item of eventIds) {
+            let eventId = item.eventId;
+            let position = item.position;
+            let cloneTraces = Object.assign({}, this.traces[0]);
+            cloneTraces.name = eventId;
+            cloneTraces.x = position.start !== position.end ? cloneTraces.x.slice(position.start, position.end) : [];
+            cloneTraces.y = position.start !== position.end ? cloneTraces.y.slice(position.start, position.end) : [];
+            if (this.is3d()) { //true
+              cloneTraces.z = position.start !== position.end ? cloneTraces.z.slice(position.start, position.end) : [];
+            }
+            newTraces.push(cloneTraces);
           }
-          newTraces.push(cloneTraces)
-        })
-        console.log(newTraces);
-        this.traces = newTraces;
+          console.log(newTraces);
+          this.traces = newTraces;
+        }
       }
+    } catch (error) {
+      console.error("Error tramsform data", error);
     }
     //console.log('SetDATA', this.traces);
     return true;
@@ -821,7 +831,7 @@ class PlotlyPanelCtrl extends MetricsPanelCtrl {
         if (this.annotations.shapes.length > 0) {
           traces = this.traces.concat(this.annotations.trace);
         }
-        console.log('ConfigChanged (traces)', traces);
+        // console.log('ConfigChanged (traces)', traces);
         Plotly.react(this.graphDiv, traces, this.layout, options);
       }
 
@@ -845,4 +855,4 @@ class PlotlyPanelCtrl extends MetricsPanelCtrl {
   }
 }
 
-export {PlotlyPanelCtrl, PlotlyPanelCtrl as PanelCtrl};
+export { PlotlyPanelCtrl, PlotlyPanelCtrl as PanelCtrl };
