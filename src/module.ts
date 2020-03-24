@@ -784,7 +784,7 @@ class PlotlyPanelCtrl extends MetricsPanelCtrl {
             }
             newTraces.push(cloneTraces);
           }
-          console.log(newTraces);
+          // console.log(newTraces);
           this.traces = newTraces;
         }
       }
