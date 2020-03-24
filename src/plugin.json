@@ -1,12 +1,12 @@
 {
   "type": "panel",
-  "name": "Plotly",
-  "id": "natel-plotly-panel",
+  "name": "Sorba-Plotly",
+  "id": "sorba-plotly-panel",
 
   "info": {
     "description": "Scatter plots and more",
     "author": {
-      "name": "Natel Energy"
+      "name": "Sorbotics"
     },
     "keywords": ["plotly", "scatter", "panel"],
     "logos": {

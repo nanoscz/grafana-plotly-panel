@@ -16,6 +16,9 @@ Works with grafana 4, 5, and 6
 ![Screenshot of 3d scatter plot](https://raw.githubusercontent.com/NatelEnergy/grafana-plotly-panel/master/src/img/screenshot-scatter-3d.png)
 ![Screenshot of the options screen](https://raw.githubusercontent.com/NatelEnergy/grafana-plotly-panel/master/src/img/screenshot-options-new.png)
 
+### Node
+version - 8.17.0 - 10.0.0
+
 ### Building
 
 To complie, run:
