@@ -142,7 +142,7 @@ class PlotlyPanelCtrl extends MetricsPanelCtrl {
     private annotationsSrv
   ) {
     super($scope, $injector);
-
+    
     this.initialized = false;
 
     //this.$tooltip = $('<div id="tooltip" class="graph-tooltip">');
@@ -629,10 +629,33 @@ class PlotlyPanelCtrl extends MetricsPanelCtrl {
     }
   }
 
+  getDataByRefId(series: any = []) {
+    let newSeries: any = []
+    if(series.length > 0) {
+      for (let serie of series) {
+        const exits =  newSeries.filter((item: any) => item.refId == serie.refId)
+        if(!exits.length) {
+          newSeries.push(serie)
+        }
+      }
+    }
+    return newSeries;
+  }
+
+  getEventIdForIndex(eventsArray) {
+    let results: any = []
+    eventsArray.map(function (item, index, array) {
+      if (array.indexOf(item) === index) {
+        results.push({ position: { start: index, end: array.lastIndexOf(item)}, eventId: item })
+      }
+    })
+    return results
+  }
+
   // This will update all trace settings *except* the data
   _updateTracesFromConfigs() {
     this.dataWarnings = [];
-
+    
     // Make sure we have a trace
     if (this.cfg.traces == null || this.cfg.traces.length < 1) {
       this.cfg.traces = [_.cloneDeep(PlotlyPanelCtrl.defaultTrace)];
@@ -735,7 +758,23 @@ class PlotlyPanelCtrl extends MetricsPanelCtrl {
         });
       }
     });
-
+    const newSeries = this.getDataByRefId(this.series)
+    const eventsArray = newSeries[0].series.datapoints.map(x => x[0])
+    const eventIds = this.getEventIdForIndex(eventsArray)
+    let newTraces: any = []
+    eventIds.forEach((item, i) => {
+      let eventId = item.eventId
+      let position = item.position
+      let cloneTraces = Object.assign({}, this.traces[0])
+      cloneTraces.position = position
+      cloneTraces.name = eventId
+      cloneTraces.x = cloneTraces.x.slice(position.start, position.end)
+      cloneTraces.y = cloneTraces.y.slice(position.start, position.end)
+      cloneTraces.z = cloneTraces.z.slice(position.start, position.end)
+      newTraces.push(cloneTraces)
+    })
+    console.log(newTraces);
+    this.traces = newTraces;
     //console.log('SetDATA', this.traces);
     return true;
   }
