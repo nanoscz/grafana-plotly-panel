@@ -766,25 +766,26 @@ class PlotlyPanelCtrl extends MetricsPanelCtrl {
     });
     try {
       if (this.series !== undefined && this.series.length !== 0) {
-        const newSeries = this.getDataByRefId(this.series);
+        let newSeries: Array<any> = this.getDataByRefId(this.series);
         if (newSeries.length !== 0) {
-          const eventsArray = newSeries[0].series.datapoints.map(x => x[0]).filter(e => e !== null); //total de eventIDs
+          newSeries = newSeries.filter(item => item["type"] == "string");
+          const eventsArray = newSeries[0].series.datapoints.map(x => x[0]).filter(e => e !== null) //total de eventIDs
           let eventIds = this.getEventIdForIndex(eventsArray);
-          eventIds = this.getFirstEventId(eventIds);
+          // eventIds = this.getFirstEventId(eventIds);
           let newTraces: any = [];
           for (const item of eventIds) {
             let eventId = item.eventId;
             let position = item.position;
             let cloneTraces = Object.assign({}, this.traces[0]);
             cloneTraces.name = eventId;
-            cloneTraces.x = position.start !== position.end ? cloneTraces.x.slice(position.start, position.end) : [];
-            cloneTraces.y = position.start !== position.end ? cloneTraces.y.slice(position.start, position.end) : [];
+            cloneTraces.x = cloneTraces.x.slice(position.start, position.end);
+            cloneTraces.y = cloneTraces.y.slice(position.start, position.end);
             if (this.is3d()) { //true
               cloneTraces.z = position.start !== position.end ? cloneTraces.z.slice(position.start, position.end) : [];
             }
             newTraces.push(cloneTraces);
           }
-          // console.log(newTraces);
+           // console.log(newTraces);
           this.traces = newTraces;
         }
       }
